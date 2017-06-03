@@ -1,0 +1,113 @@
+---
+- name: Installing GIT
+  apt: pkg=git
+
+- name: add repo for java 8
+  apt_repository: repo='ppa:webupd8team/java' state=present
+
+- name: set license selected
+  shell: /bin/echo debconf shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+  sudo: yes
+
+- name: set license seen
+  shell: /bin/echo debconf shared/accepted-oracle-license-v1-1 seen true | /usr/bin/debconf-set-selections
+  sudo: yes
+
+- name: install java 8
+  apt: name=oracle-java8-installer state=latest update-cache=yes force=yes
+  sudo: yes
+
+- name: install mysql server
+  apt: pkg=mysql-server
+
+- name: install npm
+  shell: sudo apt-get install -y npm
+  sudo: yes
+
+- name: download setup for node js
+  shell: curl -sL  https://deb.nodesource.com/setup_6.x | sudo -E bash -
+  sudo: yes
+
+- name: install nodjs
+  shell: sudo apt-get install -y nodejs
+  sudo: yes
+
+- name: install unzip
+  shell: sudo apt-get install unzip
+  sudo: yes
+
+- name: download grails 2.4.3
+  shell: wget -P /tmp/ http://dist.springframework.org.s3.amazonaws.com/release/GRAILS/grails-2.4.3.zip
+  sudo: yes
+
+- name: unzip grails 2.4.3
+  shell: sudo unzip /tmp/grails-2.4.3.zip -d /tmp/
+  sudo: yes
+
+- name: Add Grails home
+  sudo: yes
+  shell: echo 'export GRAILS_HOME=/tmp/grails-2.4.3' >> ~/.bashrc
+
+- name: Add Grails to Path
+  sudo: yes
+  shell: echo 'export PATH=$PATH:$GRAILS_HOME/bin' >> ~/.bashrc
+
+- name: download maven
+  shell: curl -o /tmp/apache-maven-3.1.1-bin.tar.gz http://apache.cs.utah.edu/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.tar.gz
+  sudo: yes
+
+- name: unzip maven
+  shell: sudo tar -xvzf /tmp/apache-maven-3.1.1-bin.tar.gz -C /tmp/
+  sudo: yes
+
+- name: install maven
+  shell: su
+  sudo: yes
+
+- name: install maven
+  shell: echo 'export M2_HOME=/tmp/apache-maven-3.1.1' >> ~/.bashrc | echo 'export PATH=$PATH:$M2_HOME/bin' >> ~/.bashrc
+  sudo: yes
+
+- name: Run source
+  shell: sh ~/.bashrc
+  sudo: yes
+
+- name: java versioni
+  shell: java -version 2>&1 | awk '/version/'
+  register: javaCat
+ 
+- name: verify java
+  debug: 
+    msg: "{{ javaCat.stdout }}"
+
+- name: git version
+  shell: git --version
+  register: gitCat
+
+- name: verify git 
+  debug: 
+    msg: "{{ gitCat.stdout }}"
+
+- name: npm version
+  shell: npm -v
+  register: npmCat
+
+- name: verify npm
+  debug: 
+    msg: "npm version {{ npmCat.stdout }}"
+
+- name: mysql version
+  shell: mysql --version
+  register: mysqlCat
+
+- name: verify mysql
+  debug: 
+    msg: "{{ mysqlCat.stdout }}"
+
+- name: node version
+  shell: node -v
+  register: nodeCat
+
+- name: verify node
+  debug: 
+    msg: "node verion {{ nodeCat.stdout }}"
